@@ -29,15 +29,17 @@ def main():
         return
     
     vulnerabilities = data.get("vulnerabilities", [])
+
     filtered_vulns = [v for v in vulnerabilities if v.get('severity') in chosen_severities]
 
     if filtered_vulns:
-        issue_body = "### Security Issues Found\n\n"
+        issue_body = "### Critical Security Issues Found\n\n"
         for v in filtered_vulns:
             #issue_body = f"- **Severity:** {v.get('severity')}\n"
             issue_body += f"  - ID: {v.get('id')}\n"
             issue_body += f"  - Title: {v.get('title')}\n"
-            issue_body += f"  - Package: {v.get('packageName')}@{v.get('version')}\n\n"
+            issue_body += f"  - Package: {v.get('packageName')}\n"
+            issue_body += f"  - Affected Version: {v.get('version')}\n\n"
     else:
         issue_body = "No Security Issues Found"
 
@@ -45,9 +47,6 @@ def main():
     # Create the GitHub issue
     token = os.environ.get("GITHUB_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY")  # e.g. "owner/repo"
-    print(f"Creating issue in {repo}")
-    print(f"Token: {token}")
-    
 
     url = f"https://api.github.com/repos/{repo}/issues"
     headers = {
