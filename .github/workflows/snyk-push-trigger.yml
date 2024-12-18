@@ -31,12 +31,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=critical --json --all-projects --debug
+          args: --severity-threshold=critical --json > /tmp/snyk.json
 
       # Step 5: Upload Snyk report for inspection
       - name: Upload Snyk Report
         uses: actions/upload-artifact@v3
         with:
           name: snyk-report
-          path: snyk.json
+          path: /tmp/snyk.json
         continue-on-error: true
