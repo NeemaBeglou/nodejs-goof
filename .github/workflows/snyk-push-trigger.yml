@@ -4,11 +4,39 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      # Step 2: Print environment variables for debugging
+      - name: Debug Environment Variables
+        run: |
+          echo "Printing environment variables:"
+          env
+
+      # Step 3: Debug token presence (safe way to confirm)
+      - name: Verify SNYK_TOKEN is set
+        run: |
+          if [ -z "${{ secrets.SNYK_TOKEN }}" ]; then
+            echo "Error: SNYK_TOKEN is not set in secrets."
+            exit 1
+          else
+            echo "SNYK_TOKEN is set."
+          fi
+
+      # Step 4: Run Snyk with debug enabled
+      - name: Run Snyk to check for vulnerabilities (with debug)
         uses: snyk/actions/node@master
-        continue-on-error: true 
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=critical --json true --all-projects
+          args: --severity-threshold=critical --json --all-projects --debug
+
+      # Step 5: Upload Snyk report for inspection
+      - name: Upload Snyk Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-report
+          path: snyk.json
+        continue-on-error: true
