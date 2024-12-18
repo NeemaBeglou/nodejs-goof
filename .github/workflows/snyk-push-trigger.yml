@@ -32,7 +32,7 @@ jobs:
 
       # Step 5: Run python script in runner vm using environment variables
       - name: Create GitHub Issue if Vulnerabilities Found
-        run: python3 create_issue.py
+        run: python3 create_issue.py critical
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
