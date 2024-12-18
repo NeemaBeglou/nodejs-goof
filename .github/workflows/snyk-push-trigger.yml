@@ -9,34 +9,32 @@ jobs:
         uses: actions/checkout@v3
         
       # Step 2: Print environment variables for debugging
-      - name: Debug Environment Variables
-        run: |
-          echo "Printing environment variables:"
-          env
-
-      # Step 3: Debug token presence (safe way to confirm)
-      - name: Verify SNYK_TOKEN is set
-        run: |
-          if [ -z "${{ secrets.SNYK_TOKEN }}" ]; then
-            echo "Error: SNYK_TOKEN is not set in secrets."
-            exit 1
-          else
-            echo "SNYK_TOKEN is set."
-          fi
+      #- name: Debug Environment Variables
+      #  run: |
+      #    echo "Printing environment variables:"
+      #    env
 
       # Step 4: Run Snyk with debug enabled
-      - name: Run Snyk to check for vulnerabilities (with debug)
-        uses: snyk/actions/node@master
-        continue-on-error: true
+      #- name: Run Snyk to check for vulnerabilities (with debug)
+      #  uses: snyk/actions/node@master
+      #  continue-on-error: true
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #  with:
+      #    args: --severity-threshold=critical --json 
+      
+      # Step 4: Run Snyk in the shell so we can redirect output
+      - name: Run Snyk test and save results
+        run: |
+          snyk test --severity-threshold=critical --json > snyk.json
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=critical --json > /tmp/snyk.json
 
-      # Step 5: Upload Snyk report for inspection
-      - name: Upload Snyk Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: snyk-report
-          path: /tmp/snyk.json
-        continue-on-error: true
+      # Step 5: Run python script in runner vm using environment variables
+      - name: Create GitHub Issue if Vulnerabilities Found
+        run: python3 create_issue.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      
