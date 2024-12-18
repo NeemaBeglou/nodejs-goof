@@ -15,20 +15,20 @@ jobs:
       #    env
 
       # Step 4: Run Snyk with debug enabled
-      #- name: Run Snyk to check for vulnerabilities (with debug)
-      #  uses: snyk/actions/node@master
-      #  continue-on-error: true
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #  with:
-      #    args: --severity-threshold=critical --json 
-      
-      # Step 4: Run Snyk in the shell so we can redirect output
-      - name: Run Snyk test and save results
-        run: |
-          snyk test --severity-threshold=critical --json > snyk.json
+      - name: Run Snyk to check for vulnerabilities (with debug)
+        uses: snyk/actions/node@master
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=critical --json 
+      
+      # Step 4: Run Snyk in the shell so we can redirect output
+      #- name: Run Snyk test and save results
+      #  run: |
+      #    snyk test --severity-threshold=critical --json > snyk.json
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       # Step 5: Run python script in runner vm using environment variables
       - name: Create GitHub Issue if Vulnerabilities Found
