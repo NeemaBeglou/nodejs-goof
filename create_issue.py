@@ -45,6 +45,9 @@ def main():
     # Create the GitHub issue
     token = os.environ.get("GITHUB_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY")  # e.g. "owner/repo"
+    print(f"Creating issue in {repo}")
+    print(f"Token: {token}")
+    
 
     url = f"https://api.github.com/repos/{repo}/issues"
     headers = {
