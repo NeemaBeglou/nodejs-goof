@@ -57,7 +57,7 @@ def process_vulnerabilities(severity_dict, vulnerabilities):
             temp_issue_body = ""
             temp_issue_body += f"  - {v.get('title')}\n"
             temp_issue_body += f"    - ID: {v.get('id')}\n"
-            temp_issue_body += f"    - Package: {v.get('packageName')}@{v.get('version')}\n\n"
+            temp_issue_body += f"    - Package@Version: {v.get('packageName')}@{v.get('version')}\n\n"
 
             # Add vuln to list, update processed_id
             severity_dict[v.get('severity')].append(temp_issue_body)
