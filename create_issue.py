@@ -34,42 +34,54 @@ def main():
         return
     
     vulnerabilities = data.get("vulnerabilities", [])
-
-    #filtered_vulns = [v for v in vulnerabilities if v.get('severity') in chosen_severities]
-    vuln_found = None
     issue_body = ""
+    processed_id = set()
+    
     for v in vulnerabilities:
         if v.get('severity') in severity_dict:
+            #skip duplicate vulnerabilities
+            if v.get('id') in processed_id:
+                continue
+            #Add first line of severity for the github issue
             if not severity_dict[v.get('severity')]:
-                #add the first line of the issue severity
-                severity_dict[v.get('severity')].append(f"### {v.get('severity')} Security Issues Found\n\n")
+                severity_dict[v.get('severity')].append(f"### {v.get('severity')} ### Security Issues Found\n\n")
             
+            #Extract required fields from vulnerability and construct string to add to severity list
             issue_body += f"  - Title: {v.get('title')}\n"
             issue_body += f"    - ID: {v.get('id')}\n"
             issue_body += f"    - Package: {v.get('packageName')}\n"
             issue_body += f"    - Affected Version: {v.get('version')}\n\n"
+            
+            #Add vuln to list, reinitialise issue_body and add to processed_id set
             severity_dict[v.get('severity')].append(issue_body)
             issue_body = ""
+            processed_id.add(v.get('id'))
     
+    title = ""
+    #Construct final github issue title and body
     for key in severity_dict.keys():
         if severity_dict[key]:
+            title += f", {len(severity_dict[key])} {key}"
             issue_body += "".join(severity_dict[key])
 
     if not issue_body:
         issue_body = "No Security Issues Found"
 
-    print(issue_body)
-    # Create the GitHub issue
+    #print(issue_body)
+    
+    #Create the GitHub issue using built in github action secrets (token is one time use)
     token = os.environ.get("GITHUB_TOKEN")
-    repo = os.environ.get("GITHUB_REPOSITORY")  # e.g. "owner/repo"
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    branch_name = os.environ.get("BRANCH_NAME", "unknown")
 
+    #Make sure to enable issues for the repo in settings
     url = f"https://api.github.com/repos/{repo}/issues"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
     payload = {
-        "title": f"Snyk Scan Results: {data.get('summary')}",
+        "title": f"Snyk Scan {branch_name}: {title[1:]} issues found",
         "body": issue_body
     }
 
