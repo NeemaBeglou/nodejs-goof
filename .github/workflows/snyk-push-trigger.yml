@@ -1,5 +1,7 @@
-name: Example workflow using Snyk
-on: [push, pull_request]
+name: Snyk Test on push to main
+on:
+  push:
+    branches: [ main ]
 jobs:
   security:
     runs-on: ubuntu-latest
@@ -21,21 +23,16 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=critical
+          #args: --severity-threshold=critical
+          args: --severity-threshold=critical|high|medium
           json: true
       
-      # Step 4: Run Snyk in the shell so we can redirect output
-      #- name: Run Snyk test and save results
-      #  run: |
-      #    snyk test --severity-threshold=critical --json > snyk.json
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
       # Step 5: Run python script in runner vm using environment variables
       - name: Create GitHub Issue if Vulnerabilities Found
         run: python3 create_issue.py critical
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          BRANCH_NAME: ${{ github.ref_name }}
 
       
