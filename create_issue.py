@@ -67,17 +67,16 @@ def main():
             title += f", {len(severity_dict[key]) - 1} {key}"
             issue_body += "".join(severity_dict[key])
 
+    #Create the GitHub issue using built in github action secrets (token is one time use)
+    token = os.environ.get("GITHUB_TOKEN")
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    branch_name = os.environ.get("BRANCH_NAME")
+
     if issue_body:
         title = f"Snyk Scan: {title[1:]} vulnerabilities in {branch_name} branch"
     else:
         issue_body = "No Security Issues Found"
         title = "Snyk Scan: No vulnerabilities found in {branch_name} branch"
-
-
-    #Create the GitHub issue using built in github action secrets (token is one time use)
-    token = os.environ.get("GITHUB_TOKEN")
-    repo = os.environ.get("GITHUB_REPOSITORY")
-    branch_name = os.environ.get("BRANCH_NAME")
 
     #Setting up POST request
     url = f"https://api.github.com/repos/{repo}/issues" #issues need to be enabled in the repo as a feature otherwise 410 error
