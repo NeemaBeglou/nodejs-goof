@@ -17,12 +17,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=critical
+          #args: --severity-threshold=critical
           json: true
       
       # Step 3: Run python script in runner vm with github vars/secrets as env vars
       - name: Create GitHub Issue filtered by severity
-        run: python3 create_issue_final.py critical 
+        run: python3 create_issue_final.py critical,high 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
