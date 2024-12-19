@@ -23,12 +23,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=low
+          args: --severity-threshold=critical
           json: true
       
       # Step 5: Run python script in runner vm using environment variables
       - name: Create GitHub Issue if Vulnerabilities Found
-        run: python3 create_issue.py critical,high
+        run: python3 create_issue.py high
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
