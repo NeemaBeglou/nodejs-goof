@@ -14,8 +14,13 @@ def main():
     severities = sys.argv[1].split('|')
     severities = [s.strip().lower() for s in severities]  # Ensure lowercase and strip spaces
     valid_severities = {'low', 'medium', 'high', 'critical'}
+    
     # Filter out invalid severities
     chosen_severities = [s for s in severities if s in valid_severities]
+    
+    severity_dict = {}
+    for s in chosen_severities:
+        severity_dict[s] = []
 
     if not chosen_severities:
         print("No valid severities provided. Valid options are: low|medium|high|critical")
@@ -30,17 +35,27 @@ def main():
     
     vulnerabilities = data.get("vulnerabilities", [])
 
-    filtered_vulns = [v for v in vulnerabilities if v.get('severity') in chosen_severities]
-
-    if filtered_vulns:
-        issue_body = "### Critical Security Issues Found\n\n"
-        for v in filtered_vulns:
-            #issue_body = f"- **Severity:** {v.get('severity')}\n"
-            issue_body += f"  - ID: {v.get('id')}\n"
+    #filtered_vulns = [v for v in vulnerabilities if v.get('severity') in chosen_severities]
+    vuln_found = None
+    issue_body = ""
+    for v in vulnerabilities:
+        if v.get('severity') in severity_dict:
+            if not severity_dict[v.get('severity')]:
+                #add the first line of the issue severity
+                severity_dict[v.get('severity')].append(f"### {v.get('severity')} Security Issues Found\n\n")
+            
             issue_body += f"  - Title: {v.get('title')}\n"
-            issue_body += f"  - Package: {v.get('packageName')}\n"
-            issue_body += f"  - Affected Version: {v.get('version')}\n\n"
-    else:
+            issue_body += f"    - ID: {v.get('id')}\n"
+            issue_body += f"    - Package: {v.get('packageName')}\n"
+            issue_body += f"    - Affected Version: {v.get('version')}\n\n"
+            severity_dict[v.get('severity')].append(issue_body)
+            issue_body = ""
+    
+    for key in severity_dict.keys():
+        if severity_dict[key]:
+            issue_body += "".join(severity_dict[key])
+
+    if not issue_body:
         issue_body = "No Security Issues Found"
 
     print(issue_body)
@@ -54,7 +69,7 @@ def main():
         "Accept": "application/vnd.github.v3+json"
     }
     payload = {
-        "title": "Snyk Scan Results",
+        "title": f"Snyk Scan Results: {data.get('summary')}",
         "body": issue_body
     }
 
