@@ -7,11 +7,11 @@ def main():
     # Check for severity argument
     if len(sys.argv) < 2:
         print("Usage: python create_issue.py <severities>")
-        print("Example: python create_issue.py critical|high|medium")
+        print("Example: python create_issue.py critical,high,medium")
         return
 
     # Parse and normalize severity levels
-    severities = sys.argv[1].split('|')
+    severities = sys.argv[1].split(',')
     severities = [s.strip().lower() for s in severities]  # Ensure lowercase and strip spaces
     valid_severities = {'low', 'medium', 'high', 'critical'}
     
