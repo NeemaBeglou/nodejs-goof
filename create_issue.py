@@ -76,7 +76,7 @@ def main():
         title = f"Snyk Scan: {title[1:]} vulnerabilities in {branch_name} branch"
     else:
         issue_body = "No Security Issues Found"
-        title = "Snyk Scan: No vulnerabilities found in {branch_name} branch"
+        title = f"Snyk Scan: No vulnerabilities found in {branch_name} branch"
 
     #Setting up POST request
     url = f"https://api.github.com/repos/{repo}/issues" #issues need to be enabled in the repo as a feature otherwise 410 error
