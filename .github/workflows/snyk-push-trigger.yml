@@ -24,7 +24,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           #args: --severity-threshold=critical
-          args: --severity-threshold=critical|high|medium
           json: true
       
       # Step 5: Run python script in runner vm using environment variables
