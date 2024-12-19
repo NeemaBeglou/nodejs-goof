@@ -10,14 +10,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      # Step 2: Print environment variables for debugging
-      #- name: Debug Environment Variables
-      #  run: |
-      #    echo "Printing environment variables:"
-      #    env
-
-      # Step 4: Run Snyk with debug enabled
-      - name: Run Snyk to check for vulnerabilities (with debug)
+      # Step 2: Run Snyk test with critical severity filter
+      - name: Run Snyk to check for vulnerabilities output as json
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
@@ -26,9 +20,9 @@ jobs:
           args: --severity-threshold=critical
           json: true
       
-      # Step 5: Run python script in runner vm using environment variables
-      - name: Create GitHub Issue if Vulnerabilities Found
-        run: python3 create_issue.py critical
+      # Step 3: Run python script in runner vm with github vars/secrets as env vars
+      - name: Create GitHub Issue filtered by severity
+        run: python3 create_issue_final.py critical 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
