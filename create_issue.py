@@ -44,7 +44,7 @@ def main():
                 continue
             #Add first line of severity for the github issue
             if not severity_dict[v.get('severity')]:
-                severity_dict[v.get('severity')].append(f"### {v.get('severity')} ### Security Issues Found\n\n")
+                severity_dict[v.get('severity')].append(f"### Security Issues Found: {v.get('severity')} severity\n\n")
             
             #Extract required fields from vulnerability and construct string to add to severity list
             issue_body += f"  - Title: {v.get('title')}\n"
@@ -61,7 +61,7 @@ def main():
     #Construct final github issue title and body
     for key in severity_dict.keys():
         if severity_dict[key]:
-            title += f", {len(severity_dict[key])} {key}"
+            title += f", {len(severity_dict[key]) - 1} {key}"
             issue_body += "".join(severity_dict[key])
 
     if not issue_body:
@@ -81,7 +81,7 @@ def main():
         "Accept": "application/vnd.github.v3+json"
     }
     payload = {
-        "title": f"Snyk Scan {branch_name}: {title[1:]} issues found",
+        "title": f"Snyk Scan: {title[1:]} vulnerabilities in {branch_name} branch",
         "body": issue_body
     }
 
