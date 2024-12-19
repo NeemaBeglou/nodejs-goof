@@ -33,11 +33,11 @@ def load_snyk_data():
     # Open the snyk.json from the scan
     try:
         with open('snyk.json', 'r') as f:
-            data = json.load(f)
+            snyk_data = json.load(f)
     except FileNotFoundError:
         print("No Snyk JSON results found")
         return None
-    return data.get("vulnerabilities", [])
+    return snyk_data
 
 def process_vulnerabilities(severity_dict, vulnerabilities):
     issue_body = ""
@@ -111,8 +111,10 @@ def main():
         return
     
     # Load vulnerabilities from snyk.json
-    vulnerabilities = load_snyk_data()
-    if vulnerabilities is None:
+    snyk_data = load_snyk_data()
+    vulnerabilities = snyk_data.get("vulnerabilities", [])
+
+    if not vulnerabilities:
         return
 
     # Process vulnerabilities and create GitHub issue
