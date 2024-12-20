@@ -21,7 +21,7 @@ jobs:
           json: true
       
       # Step 3: Run python script in runner vm with github vars/secrets as env vars
-      # Script takes critical,high,medium,low as comma seperated inputs
+      # Script takes critical,high,medium,low as comma seperated inputs test
       - name: Create GitHub Issue filtered by severity
         run: python3 create_issue.py critical
         env:
