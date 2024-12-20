@@ -23,7 +23,7 @@ jobs:
       # Step 3: Run python script in runner vm with github vars/secrets as env vars
       # Script takes critical,high,medium,low as comma seperated inputs
       - name: Create GitHub Issue filtered by severity
-        run: python3 create_issue.py critical 
+        run: python3 create_issue.py critical
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
