@@ -4,6 +4,17 @@ import requests
 import sys
 
 def parse_severities(argv):
+    """
+    Parse and validate severity levels from the command-line arguments.
+
+    Args:
+        argv (list): A list of command-line arguments, where argv[1] should contain 
+                     a comma-separated string of severities (e.g. "critical,high,medium").
+
+    Returns:
+        dict or None: A dictionary keyed by the valid chosen severities, each associated 
+                      with an empty list, or None if no valid severities are provided.
+    """
     # Check for severity argument
     if len(argv) < 2:
         print("Usage: python create_issue.py <severities>")
@@ -29,10 +40,20 @@ def parse_severities(argv):
 
     return severity_dict
 
-def load_snyk_data():
+def load_snyk_data(filename):
+    """
+    Load the Snyk JSON data from the scan. Expected in local working directory as output from a scan.
+
+    Args:
+        filename (string): A list of command-line arguments, where argv[1] should contain 
+                     a comma-separated string of severities (e.g. "critical,high,medium").
+
+    Returns:
+        dict or None: A dictionary representing the scan results, or None if the file is not found.
+    """
     # Open the snyk.json from the scan
     try:
-        with open('snyk.json', 'r') as f:
+        with open(filename, 'r') as f:
             snyk_data = json.load(f)
     except FileNotFoundError:
         print("No Snyk JSON results found")
@@ -40,6 +61,17 @@ def load_snyk_data():
     return snyk_data
 
 def process_vulnerabilities(severity_dict, vulnerabilities):
+    """
+    Processes a list of vulnerabilities by filtering against the chosen severities and outputs a formatted title and body as a tuple for a gh issue.
+    Args:
+        severity_dict (dict): A dictionary where keys are severity levels (e.g., 'low', 'medium', 'high') 
+                              and values are lists of vulnerabilities.
+        vulnerabilities (list): A list of vulnerability dicts, each containing details for the vulnerability.
+    Returns:
+        tuple: A tuple containing:
+            - title (str): A string summarizing the number of vulnerabilities found for each chosen severity level. 
+            - issue_body (str): A formatted string detailing the vulnerabilities.
+    """
     issue_body = ""
     processed_id = set()
 
@@ -63,12 +95,12 @@ def process_vulnerabilities(severity_dict, vulnerabilities):
             severity_dict[v.get('severity')].append(temp_issue_body)
             processed_id.add(v.get('id'))
 
-    title = ""
+    severity_score = ""
     final_body = ""
     # Construct final github issue title and body
     for key in severity_dict.keys():
         if severity_dict[key]:
-            title += f", {len(severity_dict[key]) - 1} {key}"
+            severity_score += f", {len(severity_dict[key]) - 1} {key}"
             final_body += "".join(severity_dict[key])
 
     if final_body:
@@ -76,15 +108,29 @@ def process_vulnerabilities(severity_dict, vulnerabilities):
     else:
         issue_body = "No Security Issues Found"
 
-    return title, issue_body
+    return severity_score, issue_body
 
-def create_github_issue(title, issue_body):
+def create_github_issue(severity_score, issue_body):
+    """
+    Create a GitHub issue describing the results of a scan.
+    This function uses the GitHub API to create an issue in the specified repository.
+    The repository, branch name, and GitHub token are retrieved from environment variables which are used to create the issue.
+    
+    Args:
+        severity_score (str): The severity score of the issue, used to generate the issue title.
+        issue_body (str): The body content of the issue. If "No Security Issues Found", a different title is used.
+    Raises:
+        requests.exceptions.HTTPError: If the HTTP request to create the issue fails.
+    Returns:
+        None
+    """
     token = os.environ.get("GITHUB_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY")
     branch_name = os.environ.get("BRANCH_NAME")
 
     if issue_body != "No Security Issues Found":
-        title = f"Snyk Scan: {title[1:]} vulnerabilities in {branch_name} branch"
+        # Strip the first comma and space from the severity_score
+        title = f"Snyk Scan: {severity_score[1:]} vulnerabilities in {branch_name} branch"
     else:
         title = f"Snyk Scan: No vulnerabilities found in {branch_name} branch"
 
@@ -111,15 +157,18 @@ def main():
         return
     
     # Load vulnerabilities from snyk.json
-    snyk_data = load_snyk_data()
-    vulnerabilities = snyk_data.get("vulnerabilities", [])
-
-    if not vulnerabilities:
+    snyk_data = load_snyk_data('snyk.json')
+    
+    # If the data is None the script fails
+    try:
+        vulnerabilities = snyk_data.get("vulnerabilities", [])
+    except Exception as e:
+        print(f"Error loading vulnerabilities from snyk.json: {e}")
         return
 
     # Process vulnerabilities and create GitHub issue
-    title, issue_body = process_vulnerabilities(severity_dict, vulnerabilities)
-    create_github_issue(title, issue_body)
+    severity_score, issue_body = process_vulnerabilities(severity_dict, vulnerabilities)
+    create_github_issue(severity_score, issue_body)
 
 if __name__ == "__main__":
     main()
