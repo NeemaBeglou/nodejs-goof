@@ -149,7 +149,7 @@ def create_github_issue(severity_score, issue_body):
 
     if issue_body != "No Security Issues Found":
         # Strip the first comma and space from the severity_score
-        title = f"Snyk Scan: {severity_score[1:]} vulnerabilities in {branch_name} branch"
+        title = f"Snyk Scan: {severity_score[1:]} open source vulnerabilities in {branch_name} branch"
     else:
         title = f"Snyk Scan: No vulnerabilities found in {branch_name} branch"
 
