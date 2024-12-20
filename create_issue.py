@@ -63,6 +63,8 @@ def load_snyk_data(filename):
 def process_vulnerabilities(severity_dict, vulnerabilities):
     """
     Processes a list of vulnerabilities by filtering against the chosen severities and outputs a formatted title and body as a tuple for a gh issue.
+    Duplicate vulnerabilities from different dependency paths are skipped and treated as duplicates.
+
     Args:
         severity_dict (dict): A dictionary where keys are severity levels (e.g., 'low', 'medium', 'high') 
                               and values are lists of vulnerabilities.
