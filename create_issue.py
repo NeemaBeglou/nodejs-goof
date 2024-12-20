@@ -25,7 +25,7 @@ def parse_args(argv):
 
 def normalize_inputs(severity_string):
     """
-    Normalize and split the severity levels from a comma-separated string.
+    Split the severity levels from a comma-separated string and convert any characters to lowercase.
 
     Args:
         severity_string (str): A comma-separated string of severities.
