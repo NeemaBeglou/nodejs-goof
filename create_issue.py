@@ -3,7 +3,7 @@ import json
 import requests
 import sys
 
-def parse_severities(argv):
+def parse_args(argv):
     """
     Parse and validate severity levels from the command-line arguments.
 
@@ -15,29 +15,46 @@ def parse_severities(argv):
         dict or None: A dictionary keyed by the valid chosen severities, each associated 
                       with an empty list, or None if no valid severities are provided.
     """
-    # Check for severity argument
     if len(argv) < 2:
         print("Usage: python create_issue.py <severities>")
         print("Example: python create_issue.py critical,high,medium")
         return None
 
-    # Parse and normalize severity levels
-    severities = argv[1].split(',')
-    severities = [s.strip().lower() for s in severities]  # Ensure lowercase and strip spaces
-    valid_severities = {'low', 'medium', 'high', 'critical'}
+    severities = normalize_inputs(argv[1])
+    return create_severity_dict(severities)
 
-    # Filter out invalid severities
+def normalize_inputs(severity_string):
+    """
+    Normalize and split the severity levels from a comma-separated string.
+
+    Args:
+        severity_string (str): A comma-separated string of severities.
+
+    Returns:
+        list: A list of normalized severity levels.
+    """
+    severities = severity_string.split(',')
+    return [s.strip().lower() for s in severities]
+
+def create_severity_dict(severities):
+    """
+    Create a dictionary of chosen severities, each associated with an empty list.
+
+    Args:
+        severities (list): A list of severity levels.
+
+    Returns:
+        dict or None: A dictionary keyed by the valid chosen severities, each associated 
+                      with an empty list, or None if no valid severities are provided.
+    """
+    valid_severities = {'low', 'medium', 'high', 'critical'}
     chosen_severities = [s for s in severities if s in valid_severities]
 
     if not chosen_severities:
         print("No valid severities provided. Valid options are: low|medium|high|critical separated by commas if you want multiple")
         return None
 
-    # Create a dictionary that contains a list of vulnerabilities for each chosen severity
-    severity_dict = {}
-    for s in chosen_severities:
-        severity_dict[s] = []
-
+    severity_dict = {s: [] for s in chosen_severities}
     return severity_dict
 
 def load_snyk_data(filename):
@@ -153,8 +170,8 @@ def create_github_issue(severity_score, issue_body):
     print(f"Issue created: {response.json()['html_url']}")
 
 def main():
-    # Parse severity levels provided as arguments
-    severity_dict = parse_severities(sys.argv)
+    # Parse severity levels provided as arguments, ensures valid input and normalizes the input
+    severity_dict = parse_args(sys.argv)
     if severity_dict is None:
         return
     
