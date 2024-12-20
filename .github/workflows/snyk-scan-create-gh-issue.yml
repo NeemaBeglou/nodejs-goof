@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the repository
-      - name: Checkout code
+      - name: Checkout local repository code
         uses: actions/checkout@v3
         
       # Step 2: Run Snyk test with critical severity filter
-      - name: Run Snyk to check for vulnerabilities output as json
+      - name: Run Snyk test for vulnerabilities and output as json
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
